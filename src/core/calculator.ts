@@ -1,4 +1,3 @@
-import { getStaticData, getDynamicData } from "../clients/homeAssignment";
 import {
   DeliveryOrderPriceResponse,
   VenueData,
@@ -6,23 +5,6 @@ import {
 } from "../types/api";
 import { DeliveryOrderInput } from "../schemas/inputValidation";
 import { EARTH_RADIUS } from "../config/constants";
-
-async function getVenueData(venue_slug: string): Promise<VenueData> {
-  const [staticData, dynamicData] = await Promise.all([
-    getStaticData(venue_slug),
-    getDynamicData(venue_slug),
-  ]);
-
-  return {
-    venue_location: staticData.venue_raw.location.coordinates,
-    order_minimum_no_surcharge:
-      dynamicData.venue_raw.delivery_specs.order_minimum_no_surcharge,
-    base_price:
-      dynamicData.venue_raw.delivery_specs.delivery_pricing.base_price,
-    distance_ranges:
-      dynamicData.venue_raw.delivery_specs.delivery_pricing.distance_ranges,
-  };
-}
 
 function calculateDeliveryDistance(
   venue_location: [number, number],
@@ -57,7 +39,7 @@ function calculateDeliveryFee(
     if (range.max === 0 && distance >= range.min) {
       throw new Error("Delivery distance is too long");
     }
-    if (distance >= range.min && distance <= range.max) {
+    if (distance >= range.min && (range.max === 0 || distance < range.max)) {
       const { a, b } = range;
       return base_price + a + Math.round((b * distance) / 10);
     }
@@ -72,12 +54,11 @@ function calculateSmallOrderSurcharge(
   return Math.max(order_minimum_no_surcharge - cart_value, 0);
 }
 
-export async function calculateDeliveryOrderPrice(
-  order: DeliveryOrderInput
-): Promise<DeliveryOrderPriceResponse> {
+export function calculateDeliveryOrderPrice(
+  order: DeliveryOrderInput,
+  venueData: VenueData
+): DeliveryOrderPriceResponse {
   try {
-    const venueData = await getVenueData(order.venue_slug);
-
     const deliveryDistance = calculateDeliveryDistance(
       venueData.venue_location,
       order.user_lat,
@@ -94,8 +75,7 @@ export async function calculateDeliveryOrderPrice(
       order.cart_value,
       venueData.order_minimum_no_surcharge
     );
-
-    return {
+    const response: DeliveryOrderPriceResponse = {
       total_price: deliveryFee + smallOrderSurcharge + order.cart_value,
       small_order_surcharge: smallOrderSurcharge,
       cart_value: order.cart_value,
@@ -104,6 +84,7 @@ export async function calculateDeliveryOrderPrice(
         distance: deliveryDistance,
       },
     };
+    return response;
   } catch (error) {
     if (error instanceof Error) {
       throw error;
