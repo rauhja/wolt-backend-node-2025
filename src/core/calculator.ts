@@ -6,7 +6,7 @@ import {
 import { DeliveryOrderInput } from "../schemas/inputValidation";
 import { EARTH_RADIUS } from "../config/constants";
 
-function calculateDeliveryDistance(
+export function calculateDeliveryDistance(
   venue_location: [number, number],
   user_lat: number,
   user_lon: number
@@ -30,7 +30,7 @@ function calculateDeliveryDistance(
   return Math.round(c * EARTH_RADIUS);
 }
 
-function validateDeliveryRanges(distance_ranges: DistanceRange[]): void {
+export function validateDeliveryRanges(distance_ranges: DistanceRange[]): void {
   if (distance_ranges.length === 0) {
     throw new Error("No distance ranges defined");
   }
@@ -48,7 +48,7 @@ function validateDeliveryRanges(distance_ranges: DistanceRange[]): void {
   }
 }
 
-function calculateDeliveryFee(
+export function calculateDeliveryFee(
   distance: number,
   base_price: number,
   distance_ranges: DistanceRange[]
@@ -70,7 +70,7 @@ function calculateDeliveryFee(
   throw new Error("Unable to calculate delivery fee");
 }
 
-function calculateSmallOrderSurcharge(
+export function calculateSmallOrderSurcharge(
   cart_value: number,
   order_minimum_no_surcharge: number
 ): number {
