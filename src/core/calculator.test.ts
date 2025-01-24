@@ -111,6 +111,30 @@ describe("Delivery Order Price Calculator Service", () => {
         calculateDeliveryOrderPrice(userTooFarAway, mockVenueData)
       ).toThrow("Delivery distance is too long");
     });
+
+    it("should throw error for empty distance ranges", () => {
+      const invalidVenueData = {
+        ...mockVenueData,
+        distance_ranges: [],
+      };
+      expect(() =>
+        calculateDeliveryOrderPrice(mockOrder, invalidVenueData)
+      ).toThrow("No distance ranges defined");
+    });
+
+    it("should throw error for negative values in distance ranges", () => {
+      const invalidVenueData = {
+        ...mockVenueData,
+        distance_ranges: [
+          { min: 0, max: 500, a: -10, b: 0, flag: null },
+          { min: 500, max: 1000, a: 100, b: 1, flag: null },
+          { min: 1000, max: 0, a: 0, b: 0, flag: null },
+        ],
+      };
+      expect(() =>
+        calculateDeliveryOrderPrice(mockOrder, invalidVenueData)
+      ).toThrow("Negative values in distance ranges");
+    });
   });
 
   describe("Edge cases", () => {

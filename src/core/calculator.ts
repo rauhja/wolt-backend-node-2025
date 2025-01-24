@@ -30,18 +30,41 @@ function calculateDeliveryDistance(
   return Math.round(c * EARTH_RADIUS);
 }
 
+function validateDeliveryRanges(distance_ranges: DistanceRange[]): void {
+  if (distance_ranges.length === 0) {
+    throw new Error("No distance ranges defined");
+  }
+
+  const hasNegativeValues = distance_ranges.some(
+    (range) =>
+      range.min < 0 ||
+      (range.max < 0 && range.max !== 0) ||
+      range.a < 0 ||
+      range.b < 0
+  );
+
+  if (hasNegativeValues) {
+    throw new Error("Negative values in distance ranges");
+  }
+}
+
 function calculateDeliveryFee(
   distance: number,
   base_price: number,
   distance_ranges: DistanceRange[]
 ): number {
+  validateDeliveryRanges(distance_ranges);
+
   for (const range of distance_ranges) {
     if (range.max === 0 && distance >= range.min) {
       throw new Error("Delivery distance is too long");
     }
-    if (distance >= range.min && (range.max === 0 || distance < range.max)) {
-      const { a, b } = range;
-      return base_price + a + Math.round((b * distance) / 10);
+
+    const isInRange =
+      distance >= range.min && (range.max === 0 || distance < range.max);
+
+    if (isInRange) {
+      return base_price + range.a + Math.round((range.b * distance) / 10);
     }
   }
   throw new Error("Unable to calculate delivery fee");
