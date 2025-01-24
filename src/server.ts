@@ -7,13 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/api/v1/delivery-order-price", (req: Request, res: Response) => {
-  const result = DeliveryOrderInputSchema.safeParse({
-    venue_slug: req.query.venue_slug,
-    cart_value: parseInt(req.query.cart_value as string),
-    user_lat: parseFloat(req.query.user_lat as string),
-    user_lon: parseFloat(req.query.user_lon as string),
-  });
-
+  const result = DeliveryOrderInputSchema.safeParse(req.query);
   if (!result.success) {
     res.status(400).json({
       error: "Invalid input",
@@ -21,10 +15,11 @@ app.get("/api/v1/delivery-order-price", (req: Request, res: Response) => {
     });
     return;
   }
+  const validatedInput = result.data;
 
-  fetchVenueData(result.data.venue_slug)
+  fetchVenueData(validatedInput.venue_slug)
     .then((venueData) => {
-      res.json(calculateDeliveryOrderPrice(result.data, venueData));
+      res.json(calculateDeliveryOrderPrice(validatedInput, venueData));
     })
     .catch((error) => {
       if (
@@ -32,6 +27,7 @@ app.get("/api/v1/delivery-order-price", (req: Request, res: Response) => {
         error.message === "Delivery distance is too long"
       ) {
         res.status(400).json({ error: "Bad Request", message: error.message });
+        return;
       }
       res.status(500).json({
         error: "Internal Server Error",

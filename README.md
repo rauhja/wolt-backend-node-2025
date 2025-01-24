@@ -1,4 +1,6 @@
-# Wolt Software Engineering Internship Assignment
+# Wolt Backend Engineering Internship Assignment
+
+This is my preliminary asignment solution for the Wolt 2025 Backend Engineering Internship.
 
 ## Installation
 
@@ -17,8 +19,26 @@ npm install
 
 ## Scripts
 
-### Run unit tests
+### Run tests
 
 ```bash
 npm run test
+```
+
+### Test coverage
+
+```bash
+npm run test:coverage
+```
+
+### Run lint
+
+```bash
+npm run lint
+```
+
+### Lint fix
+
+```bash
+npm run lint:fix
 ```

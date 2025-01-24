@@ -5,9 +5,9 @@ import { VenueData } from "../types/api";
 
 describe("Delivery Order Price Calculator Service", () => {
   const mockVenueSlug = "test-venue";
+  const mockCartValue = 1000;
   const mockUserLat = 60.17094;
   const mockUserLon = 24.93087;
-  const mockCartValue = 1000;
 
   const mockOrder: DeliveryOrderInput = {
     venue_slug: mockVenueSlug,
@@ -59,7 +59,7 @@ describe("Delivery Order Price Calculator Service", () => {
       });
     });
 
-    it("should calculate small order surcharge when cart value is below minimum", () => {
+    it("should calculate small order surcharge when cart value is below minimum order value", () => {
       const smallOrder = { ...mockOrder, cart_value: 800 };
       const result = calculateDeliveryOrderPrice(smallOrder, mockVenueData);
 
@@ -72,18 +72,33 @@ describe("Delivery Order Price Calculator Service", () => {
 
   describe("Distance calculation", () => {
     it("should calculate delivery fee based on distance ranges", () => {
-      const userSixHundredMetersAway = {
+      const userAt600m = {
         ...mockOrder,
         user_lat: 60.17551736, // Exact 600m to north from venue
         user_lon: 24.92813512,
       };
-      const result = calculateDeliveryOrderPrice(
-        userSixHundredMetersAway,
-        mockVenueData
-      );
+      const result = calculateDeliveryOrderPrice(userAt600m, mockVenueData);
 
       // For 600m distance: 190 + 100 + 1 * 600/10
       expect(result.delivery.fee).toBe(350);
+    });
+
+    it("should handle negative coordinates", () => {
+      const negativeCoordinates = {
+        ...mockOrder,
+        user_lat: -60.17094,
+        user_lon: -24.93087,
+      };
+
+      const negativeVenueCoordinates: VenueData = {
+        ...mockVenueData,
+        venue_location: [-24.92813512, -60.17012143],
+      };
+      const result = calculateDeliveryOrderPrice(
+        negativeCoordinates,
+        negativeVenueCoordinates
+      );
+      expect(result.delivery.fee).toBe(190);
     });
 
     it("should throw error when delivery is too long", () => {
@@ -99,34 +114,66 @@ describe("Delivery Order Price Calculator Service", () => {
   });
 
   describe("Edge cases", () => {
-    it("should handle zero cart value", () => {
-      const zeroCart = { ...mockOrder, cart_value: 0 };
+    it("should handle minimum allowed cart value", () => {
+      const zeroCart = { ...mockOrder, cart_value: 1 };
       const result = calculateDeliveryOrderPrice(zeroCart, mockVenueData);
 
-      expect(result.small_order_surcharge).toBe(1000);
-      expect(result.total_price).toBe(result.delivery.fee + 1000);
+      expect(result.small_order_surcharge).toBe(999);
+      expect(result.total_price).toBe(
+        result.delivery.fee + mockVenueData.order_minimum_no_surcharge
+      );
     });
 
-    it("should handle exact minimum cart value", () => {
+    it("should handle exact minimum order cart value", () => {
       const minimumCart = { ...mockOrder, cart_value: 1000 };
       const result = calculateDeliveryOrderPrice(minimumCart, mockVenueData);
 
       expect(result.small_order_surcharge).toBe(0);
     });
 
+    it("should return 0 surcharge when cart value is above minimum order value", () => {
+      const mockCart = { ...mockOrder, cart_value: 1200 };
+      const mockVenue: VenueData = {
+        ...mockVenueData,
+        order_minimum_no_surcharge: 200,
+      };
+
+      const result = calculateDeliveryOrderPrice(mockCart, mockVenue);
+      expect(result.small_order_surcharge).toBe(0);
+    });
+
     it("should handle exact distance range boundary", () => {
-      const userFiveHundredMetersAway = {
+      const userAt500m = {
         ...mockOrder,
         user_lat: 60.17461804, // Exact 500m to north from venue
         user_lon: 24.92813512,
       };
-      const result = calculateDeliveryOrderPrice(
-        userFiveHundredMetersAway,
-        mockVenueData
-      );
-
+      const result = calculateDeliveryOrderPrice(userAt500m, mockVenueData);
       // For 500m distance: 190 + 100 + 1 * 500/10
       expect(result.delivery.fee).toBe(340);
+    });
+
+    it("should handle distance exactly at venue location", () => {
+      const userAtVenue = {
+        ...mockOrder,
+        user_lat: mockVenueData.venue_location[1],
+        user_lon: mockVenueData.venue_location[0],
+      };
+      const result = calculateDeliveryOrderPrice(userAtVenue, mockVenueData);
+      // For 0m distance: 190 + 0 + 0 * 0/10
+      expect(result.delivery.fee).toBe(mockVenueData.base_price);
+      expect(result.delivery.distance).toBe(0);
+    });
+
+    it("should handle maximum possible coordinates", () => {
+      const maxCoordinatesOrder = {
+        ...mockOrder,
+        user_lat: 90,
+        user_lon: 180,
+      };
+      expect(() =>
+        calculateDeliveryOrderPrice(maxCoordinatesOrder, mockVenueData)
+      ).toThrow("Delivery distance is too long");
     });
   });
 });

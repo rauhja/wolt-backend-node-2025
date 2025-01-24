@@ -26,13 +26,6 @@ export interface DistanceRange {
   flag: null;
 }
 
-export interface DeliveryOrderInput {
-  venue_slug: string;
-  cart_value: string;
-  user_lat: string;
-  user_lon: string;
-}
-
 export interface DeliveryOrderPriceResponse {
   total_price: number;
   small_order_surcharge: number;

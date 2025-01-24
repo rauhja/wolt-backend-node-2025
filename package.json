@@ -4,7 +4,10 @@
   "scripts": {
     "start": "tsc && node --env-file=.env dist/server.js",
     "lint": "eslint .",
-    "test": "vitest"
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.7",
     "@vitest/coverage-istanbul": "^3.0.3",
+    "@vitest/coverage-v8": "^3.0.3",
     "@vitest/ui": "^3.0.3",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
@@ -29,7 +33,6 @@
     "zod": "^3.24.1"
   },
   "engines": {
-    "node": ">=20.6.0 <21",
-    "npm": "^10.8.0"
+    "node": ">=20.12.0 <21"
   }
 }
