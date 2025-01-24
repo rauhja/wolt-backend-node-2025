@@ -1,44 +1,59 @@
 # Wolt Backend Engineering Internship Assignment
 
-This is my preliminary asignment solution for the Wolt 2025 Backend Engineering Internship.
+## Description
+
+This is my preliminary assignment solution for the Wolt 2025 Backend Engineering Internship. The assignment is created using Node.js + Express.js + Typescript.
+
+The Delivery Order Price Calculator service calculates delivery order prices based on cart value, delivery distance, and venue specific pricing rules.
+
+## Prerequisites
+
+- Node.js >= 20.12.0 < 21
+- npm
 
 ## Installation
 
-### Install
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### Start and stop project locally
+2. Project files should already include .env file. If not, create a .env file in the project root with the following content:
+
+```bash
+PORT=8000
+API_BASE_URL=https://consumer-api.development.dev.woltapi.com
+```
+
+## Running the Application
+
+### Development
 
 ```bash
 1. npm start
+
 2. To stop use Ctrl + C in terminal
 ```
 
-## Scripts
+The server will start at http://localhost:8000 (or the port specified in your .env file).
 
-### Run tests
+### Running Tests
 
 ```bash
+# Run tests
 npm run test
-```
 
-### Test coverage
-
-```bash
+# Test coverage
 npm run test:coverage
 ```
 
-### Run lint
+### Linting
 
 ```bash
+# Run lint
 npm run lint
-```
 
-### Lint fix
-
-```bash
+# Lint fix
 npm run lint:fix
 ```
