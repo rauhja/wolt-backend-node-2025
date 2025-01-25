@@ -1,10 +1,33 @@
 import axios, { AxiosError } from "axios";
-import {
-  DynamicVenueResponse,
-  StaticVenueResponse,
-  VenueData,
-} from "../types/api";
 import { API_ENDPOINTS } from "../config/constants";
+import { DistanceRange } from "../types/api";
+
+interface StaticVenueResponse {
+  venue_raw: {
+    location: {
+      coordinates: [number, number];
+    };
+  };
+}
+
+interface DynamicVenueResponse {
+  venue_raw: {
+    delivery_specs: {
+      order_minimum_no_surcharge: number;
+      delivery_pricing: {
+        base_price: number;
+        distance_ranges: DistanceRange[];
+      };
+    };
+  };
+}
+
+export interface VenueData {
+  venue_location: [number, number];
+  order_minimum_no_surcharge: number;
+  base_price: number;
+  distance_ranges: DistanceRange[];
+}
 
 const client = axios.create({
   baseURL: process.env.API_BASE_URL,

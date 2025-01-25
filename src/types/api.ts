@@ -1,23 +1,3 @@
-export interface StaticVenueResponse {
-  venue_raw: {
-    location: {
-      coordinates: [number, number];
-    };
-  };
-}
-
-export interface DynamicVenueResponse {
-  venue_raw: {
-    delivery_specs: {
-      order_minimum_no_surcharge: number;
-      delivery_pricing: {
-        base_price: number;
-        distance_ranges: DistanceRange[];
-      };
-    };
-  };
-}
-
 export interface DistanceRange {
   min: number;
   max: number;
@@ -34,11 +14,4 @@ export interface DeliveryOrderPriceResponse {
     fee: number;
     distance: number;
   };
-}
-
-export interface VenueData {
-  venue_location: [number, number];
-  order_minimum_no_surcharge: number;
-  base_price: number;
-  distance_ranges: DistanceRange[];
 }

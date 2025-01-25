@@ -53,11 +53,9 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(emptyVenue);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Venue slug is required"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Venue slug is required"
+      );
     });
 
     // Assuming cart value is always greater than 0.
@@ -71,11 +69,9 @@ describe("Delivery Order Input Validation", () => {
 
       const result = DeliveryOrderInputSchema.safeParse(zeroCartValue);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Cart value must be positive"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Cart value must be positive"
+      );
     });
 
     it("should reject negative cart value", () => {
@@ -87,11 +83,9 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(negativeCartValue);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Cart value must be positive"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Cart value must be positive"
+      );
     });
 
     it("should reject non-integer cart value", () => {
@@ -103,11 +97,9 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(floatCartValue);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Cart value must be an integer"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Cart value must be an integer"
+      );
     });
 
     it("should reject latitude out of range", () => {
@@ -119,14 +111,12 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(latOutOfRange);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Latitude must be between -90 and 90"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Latitude must be between -90 and 90"
+      );
     });
 
-    it("should reject latitude out of range", () => {
+    it("should reject longitude out of range", () => {
       const lonOutOfRange = {
         venue_slug: "test-venue",
         cart_value: 1000,
@@ -135,11 +125,9 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(lonOutOfRange);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          "Longitude must be between -180 and 180"
-        );
-      }
+      expect(result.error!.issues[0].message).toContain(
+        "Longitude must be between -180 and 180"
+      );
     });
 
     it("should reject invalid value types", () => {
@@ -151,9 +139,7 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(invalidTypes);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.length).toBeGreaterThan(0);
-      }
+      expect(result.error!.issues.length).toBeGreaterThan(0);
     });
 
     it("should reject missing fields", () => {
@@ -163,9 +149,7 @@ describe("Delivery Order Input Validation", () => {
       };
       const result = DeliveryOrderInputSchema.safeParse(missingValues);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toHaveLength(2);
-      }
+      expect(result.error!.issues).toHaveLength(2);
     });
   });
 });

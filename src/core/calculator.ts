@@ -1,10 +1,7 @@
-import {
-  DeliveryOrderPriceResponse,
-  VenueData,
-  DistanceRange,
-} from "../types/api";
+import { DeliveryOrderPriceResponse, DistanceRange } from "../types/api";
 import { DeliveryOrderInput } from "../schemas/inputValidation";
 import { EARTH_RADIUS } from "../config/constants";
+import { VenueData } from "../clients/homeAssignment";
 
 export function calculateDeliveryDistance(
   venue_location: [number, number],
