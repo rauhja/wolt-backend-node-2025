@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { API_ENDPOINTS } from "../config/constants";
 import { DistanceRange } from "../types/api";
 
@@ -34,50 +34,41 @@ const client = axios.create({
 });
 
 export async function fetchVenueData(venue_slug: string): Promise<VenueData> {
-  const [staticData, dynamicData] = await Promise.all([
-    fetchStaticData(venue_slug),
-    fetchDynamicData(venue_slug),
-  ]);
+  try {
+    const [staticData, dynamicData] = await Promise.all([
+      fetchStaticData(venue_slug),
+      fetchDynamicData(venue_slug),
+    ]);
 
-  return {
-    venue_location: staticData.venue_raw.location.coordinates,
-    order_minimum_no_surcharge:
-      dynamicData.venue_raw.delivery_specs.order_minimum_no_surcharge,
-    base_price:
-      dynamicData.venue_raw.delivery_specs.delivery_pricing.base_price,
-    distance_ranges:
-      dynamicData.venue_raw.delivery_specs.delivery_pricing.distance_ranges,
-  };
+    return {
+      venue_location: staticData.venue_raw.location.coordinates,
+      order_minimum_no_surcharge:
+        dynamicData.venue_raw.delivery_specs.order_minimum_no_surcharge,
+      base_price:
+        dynamicData.venue_raw.delivery_specs.delivery_pricing.base_price,
+      distance_ranges:
+        dynamicData.venue_raw.delivery_specs.delivery_pricing.distance_ranges,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new Error(`No venue with slug of '${venue_slug}' was found`);
+    }
+    throw error;
+  }
 }
 
 export async function fetchStaticData(
   venue_slug: string
 ): Promise<StaticVenueResponse> {
-  try {
-    const url = API_ENDPOINTS.STATIC.replace("{venue_slug}", venue_slug);
-    const response = await client.get<StaticVenueResponse>(url);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
+  const url = API_ENDPOINTS.STATIC.replace("{venue_slug}", venue_slug);
+  const response = await client.get<StaticVenueResponse>(url);
+  return response.data;
 }
 
 export async function fetchDynamicData(
   venue_slug: string
 ): Promise<DynamicVenueResponse> {
-  try {
-    const url = API_ENDPOINTS.DYNAMIC.replace("{venue_slug}", venue_slug);
-    const response = await client.get<DynamicVenueResponse>(url);
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-}
-
-function handleApiError(error: unknown): never {
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError;
-    throw new Error(axiosError.message);
-  }
-  throw new Error("An unexpected error occured");
+  const url = API_ENDPOINTS.DYNAMIC.replace("{venue_slug}", venue_slug);
+  const response = await client.get<DynamicVenueResponse>(url);
+  return response.data;
 }

@@ -22,11 +22,25 @@ app.get("/api/v1/delivery-order-price", (req: Request, res: Response) => {
       res.json(calculateDeliveryOrderPrice(validatedInput, venueData));
     })
     .catch((error) => {
-      if (
-        error instanceof Error &&
-        error.message === "Delivery distance is too long"
-      ) {
-        res.status(400).json({ error: "Bad Request", message: error.message });
+      if (error instanceof Error) {
+        if (error.message.startsWith("No venue with")) {
+          res.status(404).json({
+            error: "Not Found",
+            message: error.message,
+          });
+          return;
+        }
+        if (error.message === "Delivery distance is too long") {
+          res.status(400).json({
+            error: "Bad Request",
+            message: error.message,
+          });
+          return;
+        }
+        res.status(500).json({
+          error: "Internal Server Error",
+          message: "An unexpected error occured",
+        });
         return;
       }
       res.status(500).json({
